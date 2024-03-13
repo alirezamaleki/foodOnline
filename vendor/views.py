@@ -141,6 +141,8 @@ def add_food(request):
             messages.success(request, 'Food Item added successfully!')
             return redirect('fooditems_by_category', food.category.id)
     form = FoodItemForm()
+    # modify this form
+    form.fields['category'].queryset = Category.objects.filter(vendor=get_vendor(request))
     context = {
         'form': form,
     }
@@ -163,6 +165,8 @@ def edit_food(request, pk=None):
             return redirect('fooditems_by_category', food.category.id)
     else:
         form = FoodItemForm(instance=food)
+        # modify this form
+        form.fields['category'].queryset = Category.objects.filter(vendor=get_vendor(request))
     context = {
         'form': form,
         'food': food,
