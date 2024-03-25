@@ -86,7 +86,18 @@ $(document).ready(function(){
             data: data,
             success: function(response){
                 console.log(response)
+                $('#cart_counter').html(response.cart_counter['cart_count']);
+                $('#qty-'+food_id).html(response.qty);
             }
         })
     })
-})
+
+
+    // place the cart item quantity on load
+    $('.item_qty').each(function(){
+        var the_id = $(this).attr('id')
+        var qty = $(this).attr('data-qty')
+        //console.log(qty)
+        $('#'+the_id).html(qty)
+    })
+});
