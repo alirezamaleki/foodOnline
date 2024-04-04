@@ -19,3 +19,8 @@
     font-size: 18px;
     cursor: pointer;
 }
+
+.main-search fancy bg-holder input[type="text"]{
+    color: #000000 !important;
+}
+
