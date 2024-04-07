@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from .forms import VendorForm, OpeningHourForm
 from accounts.forms import UserProfileForm
 from django.shortcuts import redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 
 from accounts.models import UserProfile
 from .models import Vendor
@@ -15,6 +15,8 @@ from .models import OpeningHour
 
 from menu.forms import CategoryForm, FoodItemForm
 from django.template.defaultfilters import slugify
+
+from django.db import IntegrityError
 
 
 def get_vendor(request):
@@ -199,5 +201,27 @@ def opening_hours(request):
 
 
 def add_opening_hours(request):
-    return HttpResponse('Add opening hour')
+    # handle the data and save them inside the database
+    if request.user.is_authenticated:
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest' and request.method == 'POST':
+            day = request.POST.get('day')
+            from_hour = request.POST.get('from_hour')
+            to_hour = request.POST.get('to_hour')
+            is_closed = request.POST.get('is_closed')
+            
+            try:
+                hour = OpeningHour.objects.create(vendor=get_vendor(request), day=day, from_hour=from_hour, to_hour=to_hour, is_closed=is_closed)
+                if hour:
+                    day = OpeningHour.objects.get(id=hour.id)
+                    if day.is_closed:
+                        response = {'status': 'success', 'id': hour.id, 'day': day.get_day_display(), 'is_closed': 'Closed'}
+                    else:
+                        response = {'status': 'success', 'id': hour.id, 'day': day.get_day_display(), 'from_hour': hour.from_hour, 'to_hour': to_hour}
+                        
+                return JsonResponse(response)
+            except IntegrityError as e:
+                response = {'status': 'failed'}
+                return JsonResponse(response)
+        else:
+            HttpResponse('Add opening hour')
 
