@@ -12,7 +12,7 @@ from django.contrib.auth.tokens import default_token_generator
 
 from django.core.exceptions import PermissionDenied
 from django.template.defaultfilters import slugify
-from orders.models import Order
+from orders.models import Order, Vendor
 
 # Restrict the vendor from accessing the customer page
 def check_role_vendor(user):
@@ -183,7 +183,15 @@ def custDashboard(request):
 @login_required(login_url='login')
 @user_passes_test(check_role_vendor)
 def vendorDashboard(request):
-    return render(request, 'accounts/vendorDashboard.html')
+    vendor = Vendor.objects.get(user=request.user)
+    orders = Order.objects.filter(vendors__in=[vendor.id])
+    recent_orders = orders[:5]
+    context = {
+        'orders': orders,
+        'orders_count': orders.count,
+        'recent_orders': recent_orders,
+    }
+    return render(request, 'accounts/vendorDashboard.html', context)
 
 
 def forgot_password(request):
