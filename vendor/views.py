@@ -250,4 +250,15 @@ def order_detail(request, order_number):
         return render(request, 'vendor/order_detail.html', context)
     except:
         return redirect('vendor')
-    
+
+
+def my_orders(request):
+    vendor = Vendor.objects.get(user=request.user)
+    orders = Order.objects.filter(vendors__in=[vendor.id])
+
+    context = {
+        'orders': orders,
+    }
+    return render(request, 'vendor/my_orders.html', context)
+
+
